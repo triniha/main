@@ -36,7 +36,7 @@ jobs:
     name: Create PR Release to Main
     runs-on: ubuntu-latest
     needs: build
-    if: ${{ needs.build.result == 'success' && needs.build.outputs.check-quality-gate == 'ok' }}
+    if: ${{ needs.build.result == 'success' && needs.build.outputs.check-quality-gate == 'passed' }}
     steps:
       - name: git checkout
         uses: actions/checkout@v3
