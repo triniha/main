@@ -22,7 +22,7 @@ jobs:
     name: Create PR and Enable Automerge
     runs-on: ubuntu-latest
     needs: sonarqube-scan
-    if: passed('sonarqube-scan')  # Only run if the SonarQube scan job is successful
+    if: success('sonarqube-scan')  # Only run if the SonarQube scan job is successful
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
