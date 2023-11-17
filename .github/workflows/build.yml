@@ -1,4 +1,4 @@
-name: Build and Merge Release Into Main
+name: Build
 
 on:
   push:
@@ -6,14 +6,14 @@ on:
       - prod
 
 jobs:
-  sonar-scan:
-    name: SonarQube Scan
+  build:
+    name: Build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
         with:
-          fetch-depth: 0
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
 
       - name: SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@master
@@ -21,32 +21,11 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
-  merge-to-main:
-    name: Merge Release Into Main
-    runs-on: ubuntu-latest
-    needs: sonar-scan
-    if: success('SonarQube Scan')
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      # If you wish to fail your job when the Quality Gate is red, uncomment the
+      # following lines. This would typically be used to fail a deployment.
+      - name: SonarQube Quality Gate
+        uses: sonarsource/sonarqube-quality-gate-action@master
         with:
-          token: ${{ secrets.TOKEN }}
-
-      - name: Create pull request
-        id: open-pr
-        uses: repo-sync/pull-request@v2
-        with:
-          github_token: ${{ secrets.TOKEN }}
-          destination_branch: ${{ github.event.repository.default_branch }}
-          pr_title: "[Automated] Merge ${{ github.ref_name }} into ${{ github.event.repository.default_branch }}"
-          pr_body: "Automated Pull Request"
-          pr_reviewer: "surajn17"
-          pr_assignee: "surajn17"
-
-      - name: Enable automerge
-        if: steps.open-pr.outputs.pr_number != ''
-        uses: peter-evans/enable-pull-request-automerge@v2
-        with:
-          token: ${{ secrets.TOKEN }}
-          pull-request-number: ${{ steps.open-pr.outputs.pr_number }}
-          merge-method: merge
+          timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
