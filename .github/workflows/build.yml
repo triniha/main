@@ -40,6 +40,9 @@ jobs:
         uses: actions/checkout@v3
         with:
           token: ${{ secrets.TOKEN }}
+          ref: pull/${{ github.event.number }}/merge
+
+      # ... rest of the workflow steps
 
       # https://github.com/marketplace/actions/github-pull-request-action
       - name: Create pull request
